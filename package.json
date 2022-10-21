@@ -1,0 +1,11 @@
+{
+  "name": "sms_marketing_api",
+  "version": "1.0.0",
+  "description": "This is a simple application that will allow sending bulk SMS from a csv",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Aston Jones",
+  "license": "ISC"
+}
