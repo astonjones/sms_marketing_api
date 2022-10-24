@@ -1,0 +1,6 @@
+Epic = find a way to send a single SMS to a prospect
+- I need to enable post request to send SMS to a prospect
+- I need to have some UI to allow easy sending
+
+Epic = Be able to send bulk SMS messages with CSV file
+- I need to be able to send to a lot of SMS at once.
