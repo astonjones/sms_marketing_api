@@ -26,5 +26,4 @@ exports.scrapeTaxLiens = async () => {
   } catch (error){
     console.log("error", error)
   }
-
 }
