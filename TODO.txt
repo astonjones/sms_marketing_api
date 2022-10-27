@@ -4,3 +4,6 @@ Epic = find a way to send a single SMS to a prospect
 
 Epic = Be able to send bulk SMS messages with CSV file
 - I need to be able to send to a lot of SMS at once.
+
+Epic = Set up a database
+    - I'm thinking I need some type of database to store data everytime I've contacted a recipient and all of thier info

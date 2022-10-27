@@ -2,27 +2,34 @@ const dotenv = require('dotenv');
 dotenv.config();
 const http = require('http');
 const express = require('express');
-const bodyParser = require('body-parser')
+const bodyParser = require('body-parser');
+const fs = require('fs');
+const Papa = require('papaparse');
 const MessagingResponse = require('twilio').twiml.MessagingResponse;
-const { forwardInboundMessage } = require('./functions/forwardMessage');
-const { sendSingleSMS } = require('./functions/sendSingleSMS');
+const { forwardInboundMessage } = require('./functions/smsFunctions/forwardMessage');
+const { sendSingleSMS } = require('./functions/smsFunctions/sendSingleSMS');
+const { sendBulkSMS } = require('./functions/smsFunctions/sendBulkSMS');
 const { scrapeTaxLiens } = require('./functions/scrapeFunctions/scrapeTaxLiens');
+const { csvToJSON } = require('./controller/csvToJson');
+const { readCollection } = require('./controller/mongoFunctions');
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
-const twilioPNumber = process.env.MY_TWILIO_NUMBER
-const forwardToPNumber = process.env.MY_PHONE_NUMBER
-const messagingService = process.env.MESSAGING_SERVICE_SID
+const twilioPNumber = process.env.MY_TWILIO_NUMBER;
+const forwardToPNumber = process.env.MY_PHONE_NUMBER;
+const messagingService = process.env.MESSAGING_SERVICE_SID;
+const MONGO_CLUSTER_URI = process.env.MONGO_CLUSTER_URI;
+const MONGO_API_KEY = process.env.MONGO_API_KEY;
 
 const app = express();
-app.use(bodyParser.urlencoded({ extended: false }))
-app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 app.get('/health', (req, res) => {
   res.send('healthy');
 })
 
-// endpoint will forward inbound SMS to specified number.
+// ------------- SMS Endpoints ------------------
 app.post('/forwardInboundMessage', (req, res) => {
   try{
     const client = require('twilio')(accountSid, authToken);
@@ -36,22 +43,61 @@ app.post('/forwardInboundMessage', (req, res) => {
 
 app.post('/sendSingleSMS', (req, res) => {
   try {
-    const client = require('twilio')(accountSid, authToken)
+    const client = require('twilio')(accountSid, authToken);
     sendSingleSMS(client, messagingService, req);
-    res.status(200).send('your sms message was sent successfully!')
+    res.status(200).send('your sms message was sent successfully!');
   } catch {
     console.log('Something went wrong here');
     res.status(500).send('Server error');
   }
 });
 
+app.post('/sendBulkSMS', (req, res) => {
+  try {
+
+  } catch {
+
+  }
+})
+
+// ---------------- End SMS Endpoints ---------------------
+
+// --------------- Utility Endpoints -------------------------
 app.post('/scrapeUrl', async (req, res) => {
   // in this endpoint we want scrape the given url
   // It should output an array of Objects with the url scraped data.
   let data = await scrapeTaxLiens();
   console.log(data);
+  res.status(200).send(data);
+})
+
+
+app.post('/convertCSVtoMongoDB', async (req, res) => {
+  let data;
+  try {
+    const client = require('twilio')(accountSid, authToken);
+    const csvFile = fs.createReadStream('./HTXVacantParsed.csv');
+    console.log('before promise')
+    data = await csvToJSON(csvFile)
+    } catch(err) {
+    console.log('Something went wrong...', err);
+    res.status(500).send('SERVER ERROR');
+  }
   res.status(200).send(data)
 })
 
-http.createServer(app).listen(1337, () => 
-console.log('express listening on port:', 1337))
+app.post('/readDB', async (req, res) => {
+  var requestMock = JSON.stringify({
+    "collection": process.env.MONGO_COLLECTION_NAME,
+    "database": process.env.MONGO_DB_NAME,
+    "dataSource": process.env.MONGO_DATA_SOURCE,
+  });
+
+  let data = await readCollection(requestMock);
+  let documents = data.documents;
+  res.status(200).send(documents);
+});
+// -------------- End of Web scrapping -----------------
+
+http.createServer(app).listen(1337, () =>
+console.log('express listening on port:', 1337));
