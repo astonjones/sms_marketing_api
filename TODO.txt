@@ -1,9 +1,12 @@
 Epic = find a way to send a single SMS to a prospect
 - I need to enable post request to send SMS to a prospect
-- I need to have some UI to allow easy sending
+    - How would this look when I am trying to reply to a prospect?
 
-Epic = Be able to send bulk SMS messages with CSV file
-- I need to be able to send to a lot of SMS at once.
+Epic = Be able to send bulk SMS messages with CSV file or DB
+- I need to be able to send a lot of SMS at once from a data source.
 
 Epic = Set up a database
-    - I'm thinking I need some type of database to store data everytime I've contacted a recipient and all of thier info
+    - find a way to store csv files in a separate collections within mongodb
+
+EPIC = UI
+    - I need some kind of UI to message back prospects
