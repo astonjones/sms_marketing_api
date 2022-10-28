@@ -1,0 +1,27 @@
+This is a nodejs api server.
+
+The following endpoints are available:
+
+ ---------------- Health check -----------------------
+    endpoint: /health
+
+    checkis if server is running returns "healhty"
+
+ ------------- Forward Inbound messaging ---------------
+    endpoint: /forwardInboundMessage
+
+This endpoint is used as a webhook to forward SMS from twilio to another number:
+
+-------------- Send a single SMS message ---------------
+    endpoint: /sendSingleSMS
+
+The following request body musts include the following:
+{
+    "to": "10 digit number",
+    "from": "10 digit number OR messageServiceID",
+    "body": "text body you want to send to the to number"
+}
+
+Send Bulk SMS message:
+I am not really sure how to write a request for this one. Right now it is just a specific operation.
+Maybe I can input the collection and db of mongo with some option parameters.

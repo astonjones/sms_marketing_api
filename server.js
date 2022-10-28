@@ -11,7 +11,8 @@ const { sendSingleSMS } = require('./services/smsFunctions/sendSingleSMS');
 const { sendBulkSMS } = require('./services/smsFunctions/sendBulkSMS');
 const { scrapeTaxLiens } = require('./services/scrapeFunctions/scrapeTaxLiens');
 const { csvToJSON } = require('./services/csvToJson');
-const { readCollection, writeManyRecordsToCollection } = require('./services/mongo/mongoFunctions');
+const { readCollection, writeManyRecordsToCollection, writeOneRecordToCollection } = require('./services/mongo/mongoFunctions');
+const { LeadModel } = require('./models/LeadModel');
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
@@ -44,7 +45,7 @@ app.post('/forwardInboundMessage', (req, res) => {
 app.post('/sendSingleSMS', (req, res) => {
   try {
     const client = require('twilio')(accountSid, authToken);
-    sendSingleSMS(client, messagingService, req);
+    sendSingleSMS(client, req);
     res.status(200).send('your sms message was sent successfully!');
   } catch {
     console.log('Something went wrong here');
@@ -53,17 +54,37 @@ app.post('/sendSingleSMS', (req, res) => {
 });
 
 app.post('/sendBulkSMS', async (req, res) => {
+  const client = require('twilio')(accountSid, authToken);
   let recipients;
+  var requestMock = JSON.stringify({
+    "collection": process.env.MONGO_COLLECTION_NAME,
+    "database": process.env.MONGO_DB_NAME,
+    "dataSource": process.env.MONGO_DATA_SOURCE
+  });
+
   try {
-    // here we need to populate recipients by fetching from mongo api
-      // then add a contacted timestamp & channel
+    let dataReadFromDb = await readCollection(requestMock)
+    let documents = dataReadFromDb.documents;
 
-    // then we need to iterate over recipients to send a message
-      // when message is sent we need to write lastContacted attribute
-  } catch {
+    documents.forEach(item => {
+      let lead = new LeadModel(item);
+      let messageBody = `message is suppose to send here - name: ${lead.ownerFirstName} - NUmber: ${item.phone1}`;
+      // First send message
+      // ---> sendSingleSMS(client, messagingService, req);
 
+      // Then add contacted attribute
+      lead.contacted('SMS');
+      console.log(lead);
+
+      //Then push document to database
+      // ---> writeOneRecordToCollection(lead)
+    });
+    res.status(200).send(documents);
+  } catch (err) {
+    console.log(err);
+    res.status(500).send('Internal server error');
   }
-})
+});
 
 // ---------------- End SMS Endpoints ---------------------
 

@@ -1,6 +1,6 @@
 // This model is going to be the standard model for storing leads in my database
 class LeadModel {
-  constructor(address, city, state, zip, ownerFirstName, ownerLastName, phone1, phone2) {
+  constructor({ address, city, state, zip, ownerFirstName, ownerLastName, phone1, phone2 }) {
     this.address = address;
     this.city = city;
     this.state = state;
@@ -12,10 +12,11 @@ class LeadModel {
     this.lastContacted = null;
     this.contactChannel = null
   }
-}
 
-function contacted(timestamp){
-  this.lastContacted = timestamp;
+  contacted(channel) {
+    this.lastContacted = new Date();
+    this.contactChannel = channel
+  }
 }
   
 module.exports = {

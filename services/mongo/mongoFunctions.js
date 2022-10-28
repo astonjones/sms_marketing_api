@@ -1,14 +1,17 @@
 const axios = require('axios');
+const mongoUri = process.env.MONGO_CLUSTER_URI
+
+const reqHeaders = {
+  'Content-Type': 'application/json',
+  'Access-Control-Request-Headers': '*',
+  'api-key': process.env.MONGO_API_KEY,
+}
 
 const readCollection = async (obj) => {
   let config = {
     method: 'post',
-    url: process.env.MONGO_CLUSTER_URI + '/action/find',
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Request-Headers': '*',
-      'api-key': process.env.MONGO_API_KEY,
-    },
+    url: mongoUri + '/action/find',
+    headers: reqHeaders,
     data: obj
   };
     
@@ -25,12 +28,8 @@ const readCollection = async (obj) => {
 const writeOneRecordToCollection = async (obj) => {
   let config = {
     method: 'post',
-    url: process.env.MONGO_CLUSTER_URI + '/action/findOne',
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Request-Headers': '*',
-      'api-key': process.env.MONGO_API_KEY,
-    },
+    url: mongoUri + '/action/findOne',
+    headers: reqHeaders,
     data: obj
   };
     
@@ -47,12 +46,8 @@ const writeOneRecordToCollection = async (obj) => {
 const writeManyRecordsToCollection = async (records) => {
   let config = {
     method: 'post',
-    url: process.env.MONGO_CLUSTER_URI + '/action/insertMany',
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Request-Headers': '*',
-      'api-key': process.env.MONGO_API_KEY,
-    },
+    url: mongoUri + '/action/insertMany',
+    headers: reqHeaders,
     data: records
   };
     
@@ -66,8 +61,8 @@ const writeManyRecordsToCollection = async (records) => {
 
 }
 
-  module.exports = {
-    readCollection: readCollection,
-    writeOneRecordToCollection: writeOneRecordToCollection,
-    writeManyRecordsToCollection: writeManyRecordsToCollection
-  };
+module.exports = {
+  readCollection: readCollection,
+  writeOneRecordToCollection: writeOneRecordToCollection,
+  writeManyRecordsToCollection: writeManyRecordsToCollection
+};
