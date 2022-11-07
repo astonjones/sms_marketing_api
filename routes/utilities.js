@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { processDocument } = require('../services/documentAi/processDocument');
 
 router.post('/scrapeUrl', async (req, res) => {
   // in this endpoint we want scrape the given url
@@ -40,5 +41,28 @@ router.post('/readDB', async (req, res) => {
   let documents = data.documents;
   res.status(200).send(documents);
 });
+
+router.post('/processDocument', async (req, res) => {
+  const projectId = process.env.GOOGLE_PROJECT_ID;
+  const location = process.env.GOOGLE_PROJECT_LOCATION; // Format is 'us' or 'eu'
+  const processorId = process.env.GOOGLE_PROCESSOR_ID; // Should be a Hexadecimal string
+
+  // Supported File Types
+  // https://cloud.google.com/document-ai/docs/processors-list#processor_form-parser
+  filePath = './form.pdf'; // The local file in your current working directory
+  mimeType = 'application/pdf';
+
+  try{
+    const document = await processDocument(projectId, location, processorId, filePath, mimeType);
+    console.log("Document Processing Complete");
+      // Print the document text as one big string
+    console.log(`Text: ${document.text}`);
+    res.status(200).send(document.text)
+  } catch(err) {
+    console.log(err);
+    res.status(500).send('Internal Server Error!');
+  }
+
+})
 
 module.exports = router;

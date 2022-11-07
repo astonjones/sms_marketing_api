@@ -1,0 +1,39 @@
+const { DocumentProcessorServiceClient } = require('@google-cloud/documentai').v1;
+const fs = require('fs');
+
+const processDocument = async (projectId, location, processorId, filePath, mimeType) => {
+    // Instantiates a client
+    const documentaiClient = new DocumentProcessorServiceClient();
+
+    // The full resource name of the processor, e.g.:
+    // projects/project-id/locations/location/processor/processor-id
+    // You must create new processors in the Cloud Console first
+    const resourceName = documentaiClient.processorPath(projectId, location, processorId);
+
+    // Read the file into memory.
+    const imageFile = fs.readFileSync(filePath);
+
+    // Convert the image data to a Buffer and base64 encode it.
+    const encodedImage = Buffer.from(imageFile).toString('base64');
+
+    // Load Binary Data into Document AI RawDocument Object
+    const rawDocument = {
+        content: encodedImage,
+        mimeType: mimeType,
+    };
+
+    // Configure ProcessRequest Object
+    const request = {
+        name: resourceName,
+        rawDocument: rawDocument
+    };
+
+    // Use the Document AI client to process the sample form
+    const [result] = await documentaiClient.processDocument(request);
+
+    return result.document;
+}
+
+module.exports = {
+    processDocument: processDocument
+}

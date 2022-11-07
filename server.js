@@ -3,7 +3,6 @@ dotenv.config();
 const http = require('http');
 const express = require('express');
 const bodyParser = require('body-parser');
-const fs = require('fs');
 const Papa = require('papaparse');
 const MessagingResponse = require('twilio').twiml.MessagingResponse;
 const { forwardInboundMessage } = require('./services/smsFunctions/forwardMessage');
