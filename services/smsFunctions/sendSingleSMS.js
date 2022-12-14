@@ -1,3 +1,6 @@
+const forwardToPNumber = process.env.MY_PHONE_NUMBER;
+const messagingService = process.env.MESSAGING_SERVICE_SID;
+
 const sendSingleSMS = (client, request) => {
   const messageObj = {
     body: request.body.Body,

@@ -34,6 +34,33 @@ const processDocument = async (projectId, location, processorId, filePath, mimeT
     return result.document;
 }
 
+/**
+ * Extract form data and confidence from processed document.
+ */
+const extractFormData = async (document) => {
+  // Extract shards from the text field
+    for (const entity of document.entities) {
+      // Fields detected. For a full list of fields for each processor see
+      // the processor documentation:
+      // https://cloud.google.com/document-ai/docs/processors-list
+      const key = entity.type;
+      // some other value formats in addition to text are availible
+      // e.g. dates: `entity.normalizedValue.dateValue.year`
+      const textValue =
+        entity.textAnchor !== null ? entity.textAnchor.content : '';
+      const conf = entity.confidence * 100;
+      console.log(
+        `* ${JSON.stringify(key)}: ${JSON.stringify(textValue)}(${conf.toFixed(
+          2
+        )}% confident)`
+      );
+    }
+
+  // need to return values
+  return 'formData';
+}
+
 module.exports = {
-    processDocument: processDocument
+  processDocument: processDocument,
+  extractFormData: extractFormData
 }

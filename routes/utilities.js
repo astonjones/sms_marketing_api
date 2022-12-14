@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { processDocument } = require('../services/documentAi/processDocument');
+const { processDocument, extractFormData } = require('../services/documentAi/processDocument');
 
 router.post('/scrapeUrl', async (req, res) => {
   // in this endpoint we want scrape the given url
@@ -49,15 +49,16 @@ router.post('/processDocument', async (req, res) => {
 
   // Supported File Types
   // https://cloud.google.com/document-ai/docs/processors-list#processor_form-parser
-  filePath = './form.pdf'; // The local file in your current working directory
+  filePath = './even_more_test.pdf'; // The local file in your current working directory
   mimeType = 'application/pdf';
 
   try{
     const document = await processDocument(projectId, location, processorId, filePath, mimeType);
+    const formData = await extractFormData(document);
     console.log("Document Processing Complete");
       // Print the document text as one big string
-    console.log(`Text: ${document.text}`);
-    res.status(200).send(document.text)
+    console.log(`Form Data: ${formData}`);
+    res.status(200).send(formData)
   } catch(err) {
     console.log(err);
     res.status(500).send('Internal Server Error!');

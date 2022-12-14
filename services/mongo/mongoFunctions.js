@@ -1,5 +1,8 @@
 const axios = require('axios');
+
 const mongoUri = process.env.MONGO_CLUSTER_URI
+const MONGO_CLUSTER_URI = process.env.MONGO_CLUSTER_URI;
+const MONGO_API_KEY = process.env.MONGO_API_KEY;
 
 const reqHeaders = {
   'Content-Type': 'application/json',
