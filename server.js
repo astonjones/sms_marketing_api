@@ -3,15 +3,11 @@ dotenv.config();
 const http = require('http');
 const express = require('express');
 const bodyParser = require('body-parser');
-const { forwardInboundMessage } = require('./services/smsFunctions/forwardMessage');
-const { sendSingleSMS } = require('./services/smsFunctions/sendSingleSMS');
-const { sendBulkSMS } = require('./services/smsFunctions/sendBulkSMS');
 const { scrapeTaxLiens } = require('./services/scrapeFunctions/scrapeTaxLiens');
 const { csvToJSON } = require('./services/csvToJson');
 const { readCollection, writeManyRecordsToCollection, writeOneRecordToCollection } = require('./services/mongo/mongoFunctions');
 const { LeadModel } = require('./models/LeadModel');
 
-const smsRoutes = require('./routes/sms');
 const mongoRoutes = require('./routes/mongoDb');
 const utilitiesRoutes = require('./routes/utilities');
 
@@ -23,7 +19,6 @@ app.get('/health', (req, res) => {
   res.send('healthy');
 })
 
-app.use("/sms", smsRoutes);
 app.use("/mongo", mongoRoutes);
 app.use("/utilities", utilitiesRoutes);
 
