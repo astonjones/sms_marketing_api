@@ -17,11 +17,12 @@ router.post('/processDocument', async (req, res) => {
 
   // Supported File Types
   // https://cloud.google.com/document-ai/docs/processors-list#processor_form-parser
-  filePath = './even_more_test.pdf'; // The local file in your current working directory
+  filePath = './doc_test.pdf'; // The local file in your current working directory
   mimeType = 'application/pdf';
 
   try{
-    const extractedData = await processDocument(projectId, location, processorId, filePath, mimeType);
+    const document = await processDocument(projectId, location, processorId, filePath, mimeType);
+    const extractedData = await extractFormData(document);
     // Here we should give out only the key value pairs
     console.log("Document Processing Complete");
     res.status(200).send(extractedData);
