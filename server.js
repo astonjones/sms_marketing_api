@@ -3,23 +3,14 @@ dotenv.config();
 const http = require('http');
 const express = require('express');
 const bodyParser = require('body-parser');
-const { forwardInboundMessage } = require('./services/smsFunctions/forwardMessage');
-const { sendSingleSMS } = require('./services/smsFunctions/sendSingleSMS');
-const { sendBulkSMS } = require('./services/smsFunctions/sendBulkSMS');
 const { scrapeTaxLiens } = require('./services/scrapeFunctions/scrapeTaxLiens');
 const { csvToJSON } = require('./services/csvToJson');
 const { readCollection, writeManyRecordsToCollection, writeOneRecordToCollection } = require('./services/mongo/mongoFunctions');
 const { LeadModel } = require('./models/LeadModel');
 
-const smsRoutes = require('./routes/sms');
 const mongoRoutes = require('./routes/mongoDb');
 const utilitiesRoutes = require('./routes/utilities');
 
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const twilioPNumber = process.env.MY_TWILIO_NUMBER;
-const forwardToPNumber = process.env.MY_PHONE_NUMBER;
-const messagingService = process.env.MESSAGING_SERVICE_SID;
 const MONGO_CLUSTER_URI = process.env.MONGO_CLUSTER_URI;
 const MONGO_API_KEY = process.env.MONGO_API_KEY;
 
@@ -31,7 +22,6 @@ app.get('/health', (req, res) => {
   res.send('healthy');
 })
 
-app.use("/sms", smsRoutes);
 app.use("/mongo", mongoRoutes);
 app.use("/utilities", utilitiesRoutes);
 
