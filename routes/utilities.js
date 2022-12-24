@@ -53,11 +53,10 @@ router.post('/processDocument', async (req, res) => {
   mimeType = 'application/pdf';
 
   try{
-    const document = await processDocument(projectId, location, processorId, filePath, mimeType);
+    const extractedData = await processDocument(projectId, location, processorId, filePath, mimeType);
+    // Here we should give out only the key value pairs
     console.log("Document Processing Complete");
-      // Print the document text as one big string
-    console.log(`Text: ${document.text}`);
-    res.status(200).send(document.text)
+    res.status(200).send(extractedData);
   } catch(err) {
     console.log(err);
     res.status(500).send('Internal Server Error!');

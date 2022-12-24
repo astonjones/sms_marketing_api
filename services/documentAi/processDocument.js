@@ -31,7 +31,20 @@ const processDocument = async (projectId, location, processorId, filePath, mimeT
     // Use the Document AI client to process the sample form
     const [result] = await documentaiClient.processDocument(request);
 
-    return result.document;
+    let extractedData = {};
+    for (const entity of result.document.entities) {
+        
+        const key = entity.type;
+        const textValue = entity.textAnchor !== null ? entity.textAnchor.content : '';
+        const conf = entity.confidence * 100;
+
+        // I need to make a filter of confidence score to judge value.
+
+        extractedData[key] = textValue;
+    }
+
+
+    return extractedData;
 }
 
 module.exports = {
