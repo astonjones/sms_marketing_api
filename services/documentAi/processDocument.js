@@ -35,7 +35,7 @@ const processDocument = async (projectId, location, processorId, filePath, mimeT
 }
 
 /**
- * Extract form data and confidence from processed document.
+ * Extract key value pairs and confidence from processed document.
  */
 const extractFormData = async (document) => {
   let extractedData = {};
