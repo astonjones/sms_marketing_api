@@ -6,7 +6,6 @@ const bodyParser = require('body-parser');
 const { scrapeTaxLiens } = require('./services/scrapeFunctions/scrapeTaxLiens');
 const { csvToJSON } = require('./services/csvToJson');
 const { readCollection, writeManyRecordsToCollection, writeOneRecordToCollection } = require('./services/mongo/mongoFunctions');
-const { LeadModel } = require('./models/LeadModel');
 
 const mongoRoutes = require('./routes/mongoDb');
 const utilitiesRoutes = require('./routes/utilities');
