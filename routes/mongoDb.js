@@ -1,4 +1,4 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
 
 router.post('/health', async (req, res) => {
@@ -36,4 +36,4 @@ router.post('/convertCSVtoMongoDB', async (req, res) => {
   res.status(200).send('end of endpoint!')
 })
 
-module.exports = router;
+export default router;

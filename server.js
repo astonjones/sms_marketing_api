@@ -1,14 +1,11 @@
-const dotenv = require('dotenv');
+import dotenv from 'dotenv';
 dotenv.config();
-const http = require('http');
-const express = require('express');
-const bodyParser = require('body-parser');
-const { scrapeTaxLiens } = require('./services/scrapeFunctions/scrapeTaxLiens');
-const { csvToJSON } = require('./services/csvToJson');
-const { readCollection, writeManyRecordsToCollection, writeOneRecordToCollection } = require('./services/mongo/mongoFunctions');
+import http from 'http';
+import express from 'express';
+import bodyParser from 'body-parser';
 
-const mongoRoutes = require('./routes/mongoDb');
-const utilitiesRoutes = require('./routes/utilities');
+import mongoRoutes from './routes/mongoDb.js';
+import utilitiesRoutes from './routes/utilities.js';
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));

@@ -1,7 +1,7 @@
 const fs = require('fs');
 const { parse } = require('csv-parse');
 
-const csvToJSON = async (csvReadStream) => {
+exports.csvToJSON = async (csvReadStream) => {
   let data = [];
   return new Promise((resolve, reject) => {
     csvReadStream
@@ -12,8 +12,4 @@ const csvToJSON = async (csvReadStream) => {
     .on("end", () => { resolve(data) })
     .on("error", () => { return {message: "something went wrong in stream."}} )
   })
-}
-
-module.exports = {
-  csvToJSON
 }

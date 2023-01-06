@@ -1,11 +1,10 @@
-const { DocumentProcessorServiceClient } = require('@google-cloud/documentai').v1;
-const {Storage} = require('@google-cloud/storage');
-const fs = require('fs');
+import * as documentAIClient from '@google-cloud/documentai';
+import {Storage} from '@google-cloud/storage';
+import fs from 'fs';
 import PQueue from 'p-queue';
 
-
 const processDocument = async (projectId, location, processorId, filePath, mimeType) => {
-    const documentaiClient = new DocumentProcessorServiceClient();
+    const documentaiClient = new documentAIClient.v1.DocumentProcessorServiceClient();
 
     // The full resource name of the processor, e.g.:
     // projects/project-id/locations/location/processor/processor-id
@@ -51,20 +50,24 @@ const extractFormData = async (document) => {
 }
 
 // This function is used to batch process multiple documents.
-async function batchProcessDocument(projectId, location, processorId, gcsInputUri, gcsOutputUri, gcsOutputUriPrefix) {
+const batchProcessDocument = async (projectId, location, processorId, gcsInputUri, gcsOutputUri, gcsOutputUriPrefix) => {
   const name = `projects/${projectId}/locations/${location}/processors/${processorId}`;
+  const documentaiClient = new documentAIClient.v1.DocumentProcessorServiceClient();
+  const storage = new Storage();
 
+  let allFiles = await storage.bucket(gcsInputUri).getFiles()
+  const fileNames = allFiles[0].map(fileName => ({
+    gcsUri: `${gcsInputUri}/${fileName.name}`,
+    mimeType: 'application/pdf'
+  }));
+
+  console.log(fileNames)
   // Configure the batch process request.
   const request = {
     name,
     inputDocuments: {
       gcsDocuments: {
-        documents: [
-          {
-            gcsUri: gcsInputUri,
-            mimeType: 'application/pdf',
-          },
-        ],
+        documents: fileNames,
       },
     },
     documentOutputConfig: {
@@ -78,10 +81,12 @@ async function batchProcessDocument(projectId, location, processorId, gcsInputUr
   // You can wait for now, or get results later.
   // Note: first request to the service takes longer than subsequent
   // requests.
-  const [operation] = await client.batchProcessDocuments(request);
+
+  const [operation] = await documentaiClient.batchProcessDocuments(request);
 
   // Wait for operation to complete.
-  await operation.promise();
+  await operation.promise()
+
   console.log('Document processing complete.');
 
   // Query Storage bucket for the results file(s).
@@ -99,46 +104,20 @@ async function batchProcessDocument(projectId, location, processorId, gcsInputUr
   const tasks = files.map((fileInfo, index) => async () => {
     // Get the file as a buffer
     const [file] = await fileInfo.download();
-
-    console.log(`Fetched file #${index + 1}:`);
-
     // The results stored in the output Storage location
     // are formatted as a document object.
     const document = JSON.parse(file.toString());
-    const {text} = document;
-
-    // Extract shards from the text field
-    const getText = textAnchor => {
-      if (!textAnchor.textSegments || textAnchor.textSegments.length === 0) {
-        return '';
-      }
-
-      // First shard in document doesn't have startIndex property
-      const startIndex = textAnchor.textSegments[0].startIndex || 0;
-      const endIndex = textAnchor.textSegments[0].endIndex;
-
-      return text.substring(startIndex, endIndex);
-    };
-
-    // Read the text recognition output from the processor
-    console.log('The document contains the following paragraphs:');
-
-    const [page1] = document.pages;
-    const {paragraphs} = page1;
-    for (const paragraph of paragraphs) {
-      const paragraphText = getText(paragraph.layout.textAnchor);
-      console.log(`Paragraph text:\n${paragraphText}`);
-    }
 
     // Form parsing provides additional output about
     // form-formatted PDFs. You  must create a form
     // processor in the Cloud Console to see full field details.
     console.log('\nThe following form key/value pairs were detected:');
 
-    const {formFields} = page1;
+    // I need to export this as an iterable data structure of objects
+    const formFields = document.entities;
     for (const field of formFields) {
-      const fieldName = getText(field.fieldName.textAnchor);
-      const fieldValue = getText(field.fieldValue.textAnchor);
+      const fieldName = field.type;
+      const fieldValue = field.textAnchor.content;
 
       console.log('Extracted key value pair:');
       console.log(`\t(${fieldName}, ${fieldValue})`);
@@ -147,8 +126,8 @@ async function batchProcessDocument(projectId, location, processorId, gcsInputUr
   await queue.addAll(tasks);
 }
 
-module.exports = {
-  processDocument: processDocument,
-  extractFormData: extractFormData,
-  batchProcessDocument: batchProcessDocument
+export {
+  processDocument,
+  extractFormData,
+  batchProcessDocument
 }
