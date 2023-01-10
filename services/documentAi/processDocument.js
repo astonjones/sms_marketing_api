@@ -32,21 +32,7 @@ const processDocument = async (projectId, location, processorId, filePath, mimeT
     // Use the Document AI client to process the sample form
     const [result] = await documentaiClient.processDocument(request);
 
-    return result.document;
-}
-
-// Extract key value pairs and confidence from processed document.
-const extractFormData = async (document) => {
-  let extractedData = {};
-  for (const entity of document.entities) {
-    const key = entity.type;
-    const textValue = entity.textAnchor !== null ? entity.textAnchor.content : '';
-    const conf = entity.confidence * 100;
-
-    extractedData[key] = textValue;
-  }
-
-  return extractedData;
+    return [result.document];
 }
 
 // This function is used to batch process multiple documents.
@@ -61,7 +47,6 @@ const batchProcessDocument = async (projectId, location, processorId, gcsInputUr
     mimeType: 'application/pdf'
   }));
 
-  console.log(fileNames)
   // Configure the batch process request.
   const request = {
     name,
@@ -86,15 +71,13 @@ const batchProcessDocument = async (projectId, location, processorId, gcsInputUr
 
   // Wait for operation to complete.
   await operation.promise()
-
-  console.log('Document processing complete.');
+  console.log({ level: "info", message:'Document processing complete.'});
 
   // Query Storage bucket for the results file(s).
   const query = {
     prefix: gcsOutputUriPrefix,
   };
-
-  console.log('Fetching results ...');
+  console.log({ level: "info", message:'Fetching results ...'});
 
   // List all of the files in the Storage bucket
   const [files] = await storage.bucket(gcsOutputUri).getFiles(query);
@@ -107,27 +90,33 @@ const batchProcessDocument = async (projectId, location, processorId, gcsInputUr
     // The results stored in the output Storage location
     // are formatted as a document object.
     const document = JSON.parse(file.toString());
-
-    // Form parsing provides additional output about
-    // form-formatted PDFs. You  must create a form
-    // processor in the Cloud Console to see full field details.
-    console.log('\nThe following form key/value pairs were detected:');
-
-    // I need to export this as an iterable data structure of objects
-    const formFields = document.entities;
-    for (const field of formFields) {
-      const fieldName = field.type;
-      const fieldValue = field.textAnchor.content;
-
-      console.log('Extracted key value pair:');
-      console.log(`\t(${fieldName}, ${fieldValue})`);
-    }
+  
+    return document;
   });
-  await queue.addAll(tasks);
+
+  return queue.addAll(tasks);
+}
+
+// Extract key value pairs and confidence from processed document.
+const keyValuePairs = async (documents) => {
+  let extractedData = {};
+  console.log('doc length', documents.length);
+
+  for(const doc of documents){
+    for (const entity of document.entities) {
+      const key = entity.type;
+      const textValue = entity.textAnchor !== null ? entity.textAnchor.content : '';
+      const conf = entity.confidence * 100;
+  
+      extractedData[key] = textValue;
+    }
+  }
+
+  return extractedData;
 }
 
 export {
   processDocument,
-  extractFormData,
+  keyValuePairs,
   batchProcessDocument
 }

@@ -1,6 +1,7 @@
 import express from 'express';
 const router = express.Router();
-import { processDocument, extractFormData, batchProcessDocument } from '../services/documentAi/processDocument.js';
+import { processDocument, keyValuePairs, batchProcessDocument } from '../services/documentAi/processDocument.js';
+import documentsToCsv from '../services/csvFunctions.js';
 import {v4 as uuidv4} from 'uuid';
 
 router.post('/scrapeUrl', async (req, res) => {
@@ -23,7 +24,7 @@ router.post('/processDocument', async (req, res) => {
 
   try{
     const document = await processDocument(projectId, location, processorId, filePath, mimeType);
-    const extractedData = await extractFormData(document);
+    const extractedData = await keyValuePairs(document);
     // Here we should give out only the key value pairs
     console.log("Document Processing Complete");
     res.status(200).send(extractedData);
@@ -44,11 +45,11 @@ router.post('/batchProcess', async (req, res) => {
   const mimeType = 'application/pdf'
 
   try{
-    const document = await batchProcessDocument(projectId, location, processorId, gcsInputUri, gcsOutputUri, gcsOutputUriPrefix);
-    // const extractedData = await extractFormData(document);
+    const documents = await batchProcessDocument(projectId, location, processorId, gcsInputUri, gcsOutputUri, gcsOutputUriPrefix);
+    await documentsToCsv(documents, './Foreclosure.csv');
+    // const extractedData = await keyValuePairs(documents);
     // Here we should give out only the key value pairs
-    console.log("Batch Document Processing Complete");
-    res.status(200).send(document);
+    res.status(200).send('Data extracted!');
   } catch(err) {
     console.log(err);
     res.status(500).send(err);
