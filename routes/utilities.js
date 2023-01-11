@@ -26,11 +26,10 @@ router.post('/processDocument', async (req, res) => {
     const document = await processDocument(projectId, location, processorId, filePath, mimeType);
     const extractedData = await keyValuePairs(document);
     // Here we should give out only the key value pairs
-    console.log("Document Processing Complete");
     res.status(200).send(extractedData);
   } catch(err) {
     console.log(err.statusDetails);
-    res.status(500).send('Internal Server Error!');
+    res.status(500).send({message: 'Internal Server Error!'});
   }
 
 })
@@ -47,9 +46,7 @@ router.post('/batchProcess', async (req, res) => {
   try{
     const documents = await batchProcessDocument(projectId, location, processorId, gcsInputUri, gcsOutputUri, gcsOutputUriPrefix);
     await documentsToCsv(documents, './Foreclosure.csv');
-    // const extractedData = await keyValuePairs(documents);
-    // Here we should give out only the key value pairs
-    res.status(200).send('Data extracted!');
+    res.status(200).send({message: 'Data has been written to a csv file!'});
   } catch(err) {
     console.log(err);
     res.status(500).send(err);

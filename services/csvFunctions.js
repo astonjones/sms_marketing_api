@@ -1,4 +1,3 @@
-import fs from 'fs';
 import csv from 'csv-writer';
 import DocumentDataModel from '../models/DocumentDataModel.js'
 
