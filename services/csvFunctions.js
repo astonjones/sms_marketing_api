@@ -13,7 +13,7 @@ const documentsToCsv = async (documents, filePath) => {
       header: Object.keys(documentDataArray[0])
     });
     await csvWriter.writeRecords(documentDataArray);
-    console.log(`{ level: "info", message: "CSV file created at ${filePath}"`);
+    console.log({ level: "info", message: `CSV file created at ${filePath}`});
   } catch (err) {
     console.error(err);
   }

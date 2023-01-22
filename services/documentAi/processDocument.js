@@ -36,8 +36,10 @@ const batchProcessDocument = async (projectId, location, processorId, gcsInputUr
   const name = `projects/${projectId}/locations/${location}/processors/${processorId}`;
   const documentaiClient = new documentAIClient.v1.DocumentProcessorServiceClient();
   const storage = new Storage();
+  //Used to look for a specific files when hunting files for input
+  const inputOptions = { prefix: 'march_foreclosure_sell_date_2' }
 
-  let allFiles = await storage.bucket(gcsInputUri).getFiles()
+  let allFiles = await storage.bucket(gcsInputUri).getFiles(inputOptions)
   const fileNames = allFiles[0].map(fileName => ({
     gcsUri: `${gcsInputUri}/${fileName.name}`,
     mimeType: 'application/pdf'
@@ -95,6 +97,11 @@ const keyValuePairs = async (documents) => {
       const key = entity.type;
       const textValue = entity.textAnchor !== null ? entity.textAnchor.content : '';
       const conf = entity.confidence * 100;
+
+      if(conf < 85){
+        // Something else should happen here to handle the documents. Maybe they should go in some other queue?
+        console.log({level: 'info', message: `Key: ${key} - in document has less than 85% confidence.`})
+      }
   
       extractedData[key] = textValue;
     }

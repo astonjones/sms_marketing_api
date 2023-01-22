@@ -43,4 +43,4 @@ async function scrape() {
   });
 }
 
-scrape();
+export default scrape;
